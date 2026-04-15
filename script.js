@@ -29,6 +29,43 @@ function escLaTeX(str) {
     .replace(/\^/g,  '\\textasciicircum{}');
 }
 
+//function to send data to overLeaf
+async function openInOverleaf(latex) {
+    try {
+        // Copy LaTeX to clipboard
+        await navigator.clipboard.writeText(latex);
+
+        // Open Overleaf in new tab
+        window.open("https://www.overleaf.com/project", "_blank");
+
+        // Friendly feedback
+        alert("LaTeX copied to clipboard! Paste it into Overleaf (Ctrl + V).");
+
+    } catch (err) {
+        console.error("Clipboard failed:", err);
+
+        // Fallback if clipboard fails
+        fallbackCopy(latex);
+    }
+}
+
+function fallbackCopy(text) {
+    const textarea = document.createElement("textarea");
+    textarea.value = text;
+
+    document.body.appendChild(textarea);
+    textarea.select();
+
+    try {
+        document.execCommand("copy");
+        alert("LaTeX copied! ");
+    } catch (err) {
+        alert("Copy failed. Please copy manually from preview.");
+    }
+
+    document.body.removeChild(textarea);
+}
+
 /**
  * Formats a date string (YYYY-MM-DD) into a readable format.
  * @param {string} dateStr
@@ -486,69 +523,71 @@ function generateMinutesLaTeX() {
   const nextDate    = escLaTeX(formatDate(document.getElementById('m-next-date').value) || 'TBD');
   const nextPurpose = escLaTeX(document.getElementById('m-next-purpose').value.trim() || 'TBD');
 
+
+  const latex = `\\documentclass[12pt]{article}
+                  \\usepackage[a4paper, margin=1in]{geometry}
+                  \\usepackage{setspace}
+                  \\usepackage{longtable}
+                  \\usepackage{titlesec}
+                  \\setstretch{1.2}
+                  \\titleformat{\\section}{\\large\\bfseries}{\\thesection}{1em}{}
+                  \\begin{document}
+
+                  \\begin{center}
+                      \\LARGE \\textbf{Meeting Minutes} \\\\
+                      \\vspace{0.3cm}
+                      \\large \\textbf{${title}} \\\\
+                  \\end{center}
+
+                  \\vspace{0.5cm}
+                  \\section{Meeting Details}
+                  \\textbf{Date:} ${date} \\\\
+                  \\textbf{Time:} ${time} \\\\
+                  \\textbf{Location:} ${location} \\\\
+                  \\textbf{Meeting Lead:} ${lead}
+
+                  \\vspace{0.3cm}
+                  \\textbf{Attendees:}
+                  \\begin{itemize}
+                  ${attendeeItems}
+                  \\end{itemize}
+
+                  \\section{Purpose of the Meeting}
+                  ${purpose}
+
+                  \\section{Key Discussion Points}
+                  ${topicsLaTeX.trimEnd()}
+
+                  \\section{Decisions Made}
+                  \\begin{itemize}
+                  ${decisionItems}
+                  \\end{itemize}
+
+                  \\section{Action Items}
+                  \\begin{longtable}{|p{7cm}|p{3cm}|p{3cm}|}
+                  \\hline
+                  \\textbf{Task} & \\textbf{Responsible} & \\textbf{Deadline} \\\\
+                  \\hline
+                  ${actionTableRows.trimEnd()}
+                  \\end{longtable}
+
+                  \\section{Issues and Risks}
+                  \\begin{itemize}
+                  ${riskItems}
+                  \\end{itemize}
+
+                  \\section{Next Steps}
+                  \\begin{itemize}
+                  ${stepItems}
+                  \\end{itemize}
+
+                  \\section{Next Meeting}
+                  \\textbf{Date:} ${nextDate} \\\\
+                  \\textbf{Purpose:} ${nextPurpose}
+
+                  \\end{document}`; 
   // ── Assemble LaTeX document
-  return `\\documentclass[12pt]{article}
-\\usepackage[a4paper, margin=1in]{geometry}
-\\usepackage{setspace}
-\\usepackage{longtable}
-\\usepackage{titlesec}
-\\setstretch{1.2}
-\\titleformat{\\section}{\\large\\bfseries}{\\thesection}{1em}{}
-\\begin{document}
-
-\\begin{center}
-    \\LARGE \\textbf{Meeting Minutes} \\\\
-    \\vspace{0.3cm}
-    \\large \\textbf{${title}} \\\\
-\\end{center}
-
-\\vspace{0.5cm}
-\\section{Meeting Details}
-\\textbf{Date:} ${date} \\\\
-\\textbf{Time:} ${time} \\\\
-\\textbf{Location:} ${location} \\\\
-\\textbf{Meeting Lead:} ${lead}
-
-\\vspace{0.3cm}
-\\textbf{Attendees:}
-\\begin{itemize}
-${attendeeItems}
-\\end{itemize}
-
-\\section{Purpose of the Meeting}
-${purpose}
-
-\\section{Key Discussion Points}
-${topicsLaTeX.trimEnd()}
-
-\\section{Decisions Made}
-\\begin{itemize}
-${decisionItems}
-\\end{itemize}
-
-\\section{Action Items}
-\\begin{longtable}{|p{7cm}|p{3cm}|p{3cm}|}
-\\hline
-\\textbf{Task} & \\textbf{Responsible} & \\textbf{Deadline} \\\\
-\\hline
-${actionTableRows.trimEnd()}
-\\end{longtable}
-
-\\section{Issues and Risks}
-\\begin{itemize}
-${riskItems}
-\\end{itemize}
-
-\\section{Next Steps}
-\\begin{itemize}
-${stepItems}
-\\end{itemize}
-
-\\section{Next Meeting}
-\\textbf{Date:} ${nextDate} \\\\
-\\textbf{Purpose:} ${nextPurpose}
-
-\\end{document}`;
+  return latex;
 }
 
 /* ═══════════════════════════════════════════════
@@ -591,87 +630,88 @@ function generateRetroLaTeX() {
     || 'No system contribution recorded.');
 
   // ── Assemble LaTeX document
-  return `\\documentclass[11pt,a4paper]{article}
-% Packages
-\\usepackage[margin=1in]{geometry}
-\\usepackage{titlesec}
-\\usepackage{setspace}
-\\usepackage{parskip}
-\\usepackage{xcolor}
-\\usepackage{helvet}
-\\usepackage{fancyhdr}
-\\usepackage{tikz}
-\\usetikzlibrary{calc}
-\\renewcommand{\\familydefault}{\\sfdefault}
+  const latex = `\\documentclass[11pt,a4paper]{article}
+                  % Packages
+                  \\usepackage[margin=1in]{geometry}
+                  \\usepackage{titlesec}
+                  \\usepackage{setspace}
+                  \\usepackage{parskip}
+                  \\usepackage{xcolor}
+                  \\usepackage{helvet}
+                  \\usepackage{fancyhdr}
+                  \\usepackage{tikz}
+                  \\usetikzlibrary{calc}
+                  \\renewcommand{\\familydefault}{\\sfdefault}
 
-% Colors
-\\definecolor{primary}{HTML}{1F4E79}
-\\definecolor{secondary}{HTML}{555555}
+                  % Colors
+                  \\definecolor{primary}{HTML}{1F4E79}
+                  \\definecolor{secondary}{HTML}{555555}
 
-% Section formatting
-\\titleformat{\\section}
-  {\\large\\bfseries\\color{primary}}
-  {}
-  {0em}
-  {}
+                  % Section formatting
+                  \\titleformat{\\section}
+                    {\\large\\bfseries\\color{primary}}
+                    {}
+                    {0em}
+                    {}
 
-% Line spacing
-\\setstretch{1.2}
+                  % Line spacing
+                  \\setstretch{1.2}
 
-% Footer setup
-\\pagestyle{fancy}
-\\fancyhf{}
-\\fancyfoot[C]{\\color{secondary} Sprint Retrospective \\textbar\\ 2026 \\textbar\\ Page \\thepage}
-\\renewcommand{\\headrulewidth}{0pt}
-\\renewcommand{\\footrulewidth}{0pt}
+                  % Footer setup
+                  \\pagestyle{fancy}
+                  \\fancyhf{}
+                  \\fancyfoot[C]{\\color{secondary} Sprint Retrospective \\textbar\\ 2026 \\textbar\\ Page \\thepage}
+                  \\renewcommand{\\headrulewidth}{0pt}
+                  \\renewcommand{\\footrulewidth}{0pt}
 
-% Border using TikZ
-\\usepackage{eso-pic}
-\\AddToShipoutPictureBG{%
-\\begin{tikzpicture}[remember picture, overlay]
-\\draw[line width=1.5pt, color=primary]
-    ($(current page.north west) + (1cm,-1cm)$)
-    rectangle
-    ($(current page.south east) + (-1cm,1cm)$);
-\\end{tikzpicture}%
-}
+                  % Border using TikZ
+                  \\usepackage{eso-pic}
+                  \\AddToShipoutPictureBG{%
+                  \\begin{tikzpicture}[remember picture, overlay]
+                  \\draw[line width=1.5pt, color=primary]
+                      ($(current page.north west) + (1cm,-1cm)$)
+                      rectangle
+                      ($(current page.south east) + (-1cm,1cm)$);
+                  \\end{tikzpicture}%
+                  }
 
-\\begin{document}
+                  \\begin{document}
 
-% Header
-\\begin{center}
-    {\\Huge \\bfseries \\color{primary} Sprint \\#${sprint} Retrospective} \\\\[10pt]
-    {\\large \\color{secondary} ${name}} \\\\[5pt]
-    {\\small \\color{secondary} ${course} \\quad | \\quad ${date}}
-\\end{center}
+                  % Header
+                  \\begin{center}
+                      {\\Huge \\bfseries \\color{primary} Sprint \\#${sprint} Retrospective} \\\\[10pt]
+                      {\\large \\color{secondary} ${name}} \\\\[5pt]
+                      {\\small \\color{secondary} ${course} \\quad | \\quad ${date}}
+                  \\end{center}
 
-\\vspace{20pt}
+                  \\vspace{20pt}
 
-% Sections
-\\section*{Overview of Contributions}
-${contributions}
+                  % Sections
+                  \\section*{Overview of Contributions}
+                  ${contributions}
 
-\\vspace{10pt}
+                  \\vspace{10pt}
 
-\\section*{Challenges Encountered}
-${challenges}
+                  \\section*{Challenges Encountered}
+                  ${challenges}
 
-\\vspace{10pt}
+                  \\vspace{10pt}
 
-\\section*{What I Would Do Differently}
-${differently}
+                  \\section*{What I Would Do Differently}
+                  ${differently}
 
-\\vspace{10pt}
+                  \\vspace{10pt}
 
-\\section*{Contribution to the Overall System}
-${system}
+                  \\section*{Contribution to the Overall System}
+                  ${system}
 
-\\vspace{20pt}
-\\hrule
-\\vspace{5pt}
-{\\small \\color{secondary} This document reflects individual contributions and learning during the sprint.}
+                  \\vspace{20pt}
+                  \\hrule
+                  \\vspace{5pt}
+                  {\\small \\color{secondary} This document reflects individual contributions and learning during the sprint.}
 
-\\end{document}`;
+                  \\end{document}`;
+  return latex;
 }
 
 /* ═══════════════════════════════════════════════
@@ -685,6 +725,9 @@ document.getElementById('form-minutes').addEventListener('submit', (e) => {
 
   const title = document.getElementById('m-title').value.trim();
   showOutput(latex, `Meeting Minutes — ${title}`, `minutes_${sanitizeFilename(title)}.tex`);
+  document.getElementById("overleafBtn").addEventListener("click", () => {
+    openInOverleaf(latex); 
+  })
 });
 
 document.getElementById('form-retro').addEventListener('submit', (e) => {
@@ -695,6 +738,9 @@ document.getElementById('form-retro').addEventListener('submit', (e) => {
   const sprint = document.getElementById('r-sprint').value.trim();
   const name   = document.getElementById('r-name').value.trim();
   showOutput(latex, `Sprint #${sprint} Retrospective — ${name}`, `retro_sprint${sprint}_${sanitizeFilename(name)}.tex`);
+  document.getElementById("overleafBtn").addEventListener("click", () => {
+    openInOverleaf(latex); 
+  })
 });
 
 /* ═══════════════════════════════════════════════
