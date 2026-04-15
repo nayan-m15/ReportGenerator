@@ -1,0 +1,401 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>LaTeX Report Generator</title>
+  <link rel="preconnect" href="https://fonts.googleapis.com" />
+  <link rel="preconnect" href="https://fonts.gstatic.com" crossorigin />
+  <link href="https://fonts.googleapis.com/css2?family=Lora:ital,wght@0,400;0,600;1,400&family=JetBrains+Mono:wght@400;500&family=DM+Sans:opsz,wght@9..40,300;9..40,400;9..40,500;9..40,600&display=swap" rel="stylesheet" />
+  <link rel="stylesheet" href="styles.css" />
+</head>
+<body>
+
+  <!-- Background texture -->
+  <div class="bg-grid" aria-hidden="true"></div>
+
+  <!-- App Shell -->
+  <div class="app-shell">
+
+    <!-- Header -->
+    <header class="app-header">
+      <div class="header-inner">
+        <div class="logo">
+          <span class="logo-mark">∂</span>
+          <span class="logo-text">TeXReport</span>
+        </div>
+        <p class="header-tagline">Professional LaTeX document generation</p>
+      </div>
+    </header>
+
+    <!-- Main Content -->
+    <main class="app-main">
+
+      <!-- Tab Navigation -->
+      <nav class="tab-nav" role="tablist" aria-label="Report type">
+        <button class="tab-btn active" role="tab" data-tab="minutes" aria-selected="true" aria-controls="tab-minutes">
+          <span class="tab-icon">◈</span>
+          Minutes of Meeting
+        </button>
+        <button class="tab-btn" role="tab" data-tab="retro" aria-selected="false" aria-controls="tab-retro">
+          <span class="tab-icon">◉</span>
+          Sprint Retrospective
+        </button>
+        <div class="tab-indicator" aria-hidden="true"></div>
+      </nav>
+
+      <!-- ═══════════════════════════════════ -->
+      <!-- TAB: MINUTES OF MEETING            -->
+      <!-- ═══════════════════════════════════ -->
+      <section class="tab-panel active" id="tab-minutes" role="tabpanel" aria-labelledby="">
+
+        <form id="form-minutes" novalidate>
+
+          <!-- Meeting Details -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">01</span>
+              <div>
+                <h2 class="card-title">Meeting Details</h2>
+                <p class="card-subtitle">Core information about the meeting</p>
+              </div>
+            </div>
+            <div class="field-grid field-grid--2">
+              <div class="field-group">
+                <label class="field-label" for="m-title">Meeting Title <span class="required">*</span></label>
+                <input type="text" id="m-title" class="field-input" placeholder="e.g. Q2 Planning Session" required />
+                <span class="field-error" id="err-m-title"></span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="m-lead">Meeting Lead <span class="required">*</span></label>
+                <input type="text" id="m-lead" class="field-input" placeholder="e.g. Jane Smith" required />
+                <span class="field-error" id="err-m-lead"></span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="m-date">Date <span class="required">*</span></label>
+                <input type="date" id="m-date" class="field-input" required />
+                <span class="field-error" id="err-m-date"></span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="m-time">Time</label>
+                <input type="time" id="m-time" class="field-input" />
+              </div>
+              <div class="field-group field-group--full">
+                <label class="field-label" for="m-location">Location</label>
+                <input type="text" id="m-location" class="field-input" placeholder="e.g. Conference Room B / Zoom" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Attendees -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">02</span>
+              <div>
+                <h2 class="card-title">Attendees</h2>
+                <p class="card-subtitle">Add all meeting participants</p>
+              </div>
+            </div>
+            <div id="attendees-list" class="dynamic-list">
+              <div class="dynamic-item">
+                <input type="text" class="field-input attendee-input" placeholder="Full name" />
+                <button type="button" class="btn-remove" aria-label="Remove attendee">✕</button>
+              </div>
+            </div>
+            <button type="button" class="btn-add-item" id="add-attendee">
+              <span>+</span> Add Attendee
+            </button>
+          </div>
+
+          <!-- Purpose -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">03</span>
+              <div>
+                <h2 class="card-title">Purpose of the Meeting</h2>
+                <p class="card-subtitle">Brief description of meeting objectives</p>
+              </div>
+            </div>
+            <div class="field-group">
+              <label class="field-label" for="m-purpose">Purpose <span class="required">*</span></label>
+              <textarea id="m-purpose" class="field-textarea" rows="3" placeholder="Describe the purpose and objectives of this meeting…" required></textarea>
+              <span class="field-error" id="err-m-purpose"></span>
+            </div>
+          </div>
+
+          <!-- Key Discussion Points -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">04</span>
+              <div>
+                <h2 class="card-title">Key Discussion Points</h2>
+                <p class="card-subtitle">Topics discussed, with supporting bullet points</p>
+              </div>
+            </div>
+            <div id="topics-list">
+              <!-- Injected by JS -->
+            </div>
+            <button type="button" class="btn-add-item" id="add-topic">
+              <span>+</span> Add Topic
+            </button>
+          </div>
+
+          <!-- Decisions Made -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">05</span>
+              <div>
+                <h2 class="card-title">Decisions Made</h2>
+                <p class="card-subtitle">Key outcomes and agreed decisions</p>
+              </div>
+            </div>
+            <div id="decisions-list" class="dynamic-list">
+              <div class="dynamic-item">
+                <input type="text" class="field-input decision-input" placeholder="Describe a decision made…" />
+                <button type="button" class="btn-remove" aria-label="Remove decision">✕</button>
+              </div>
+            </div>
+            <button type="button" class="btn-add-item" id="add-decision">
+              <span>+</span> Add Decision
+            </button>
+          </div>
+
+          <!-- Action Items -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">06</span>
+              <div>
+                <h2 class="card-title">Action Items</h2>
+                <p class="card-subtitle">Tasks, owners, and deadlines</p>
+              </div>
+            </div>
+            <div class="action-table-wrapper">
+              <div class="action-table-header">
+                <span>Task</span>
+                <span>Responsible</span>
+                <span>Deadline</span>
+                <span></span>
+              </div>
+              <div id="actions-list">
+                <!-- Injected by JS -->
+              </div>
+            </div>
+            <button type="button" class="btn-add-item" id="add-action">
+              <span>+</span> Add Action Item
+            </button>
+          </div>
+
+          <!-- Issues and Risks -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">07</span>
+              <div>
+                <h2 class="card-title">Issues &amp; Risks</h2>
+                <p class="card-subtitle">Identified blockers, risks, or concerns</p>
+              </div>
+            </div>
+            <div id="risks-list" class="dynamic-list">
+              <div class="dynamic-item">
+                <input type="text" class="field-input risk-input" placeholder="Describe an issue or risk…" />
+                <button type="button" class="btn-remove" aria-label="Remove risk">✕</button>
+              </div>
+            </div>
+            <button type="button" class="btn-add-item" id="add-risk">
+              <span>+</span> Add Issue / Risk
+            </button>
+          </div>
+
+          <!-- Next Steps -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">08</span>
+              <div>
+                <h2 class="card-title">Next Steps</h2>
+                <p class="card-subtitle">Immediate follow-up actions</p>
+              </div>
+            </div>
+            <div id="nextsteps-list" class="dynamic-list">
+              <div class="dynamic-item">
+                <input type="text" class="field-input nextstep-input" placeholder="Describe a next step…" />
+                <button type="button" class="btn-remove" aria-label="Remove next step">✕</button>
+              </div>
+            </div>
+            <button type="button" class="btn-add-item" id="add-nextstep">
+              <span>+</span> Add Next Step
+            </button>
+          </div>
+
+          <!-- Next Meeting -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">09</span>
+              <div>
+                <h2 class="card-title">Next Meeting</h2>
+                <p class="card-subtitle">Scheduled follow-up details</p>
+              </div>
+            </div>
+            <div class="field-grid field-grid--2">
+              <div class="field-group">
+                <label class="field-label" for="m-next-date">Date</label>
+                <input type="date" id="m-next-date" class="field-input" />
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="m-next-purpose">Purpose</label>
+                <input type="text" id="m-next-purpose" class="field-input" placeholder="e.g. Review action items" />
+              </div>
+            </div>
+          </div>
+
+          <!-- Generate Button -->
+          <div class="generate-bar">
+            <button type="submit" class="btn-generate" id="btn-generate-minutes">
+              <span class="btn-generate-icon">⟨/⟩</span>
+              Generate LaTeX Document
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- ═══════════════════════════════════ -->
+      <!-- TAB: RETROSPECTIVE                 -->
+      <!-- ═══════════════════════════════════ -->
+      <section class="tab-panel" id="tab-retro" role="tabpanel">
+
+        <form id="form-retro" novalidate>
+
+          <!-- Sprint Info -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">01</span>
+              <div>
+                <h2 class="card-title">Sprint Information</h2>
+                <p class="card-subtitle">Basic details about this retrospective</p>
+              </div>
+            </div>
+            <div class="field-grid field-grid--2">
+              <div class="field-group">
+                <label class="field-label" for="r-sprint">Sprint Number <span class="required">*</span></label>
+                <input type="text" id="r-sprint" class="field-input" placeholder="e.g. 4" required />
+                <span class="field-error" id="err-r-sprint"></span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="r-date">Date <span class="required">*</span></label>
+                <input type="date" id="r-date" class="field-input" required />
+                <span class="field-error" id="err-r-date"></span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="r-name">Your Name <span class="required">*</span></label>
+                <input type="text" id="r-name" class="field-input" placeholder="e.g. Alex Johnson" required />
+                <span class="field-error" id="err-r-name"></span>
+              </div>
+              <div class="field-group">
+                <label class="field-label" for="r-course">Course / Module <span class="required">*</span></label>
+                <input type="text" id="r-course" class="field-input" placeholder="e.g. Software Engineering 301" required />
+                <span class="field-error" id="err-r-course"></span>
+              </div>
+            </div>
+          </div>
+
+          <!-- Overview -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">02</span>
+              <div>
+                <h2 class="card-title">Overview of Contributions</h2>
+                <p class="card-subtitle">What you personally built during this sprint</p>
+              </div>
+            </div>
+            <div class="field-group">
+              <textarea id="r-contributions" class="field-textarea" rows="5" placeholder="Describe the features, components, or systems you worked on. Be specific about your personal contributions…" required></textarea>
+              <span class="field-error" id="err-r-contributions"></span>
+            </div>
+          </div>
+
+          <!-- Challenges -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">03</span>
+              <div>
+                <h2 class="card-title">Challenges Encountered</h2>
+                <p class="card-subtitle">Technical, conceptual, or team-related difficulties</p>
+              </div>
+            </div>
+            <div class="field-group">
+              <textarea id="r-challenges" class="field-textarea" rows="5" placeholder="Explain what you found difficult — technical issues, unfamiliar tools, time constraints, or collaboration challenges…"></textarea>
+            </div>
+          </div>
+
+          <!-- What I Would Do Differently -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">04</span>
+              <div>
+                <h2 class="card-title">What I Would Do Differently</h2>
+                <p class="card-subtitle">Improvements for future sprints</p>
+              </div>
+            </div>
+            <div class="field-group">
+              <textarea id="r-differently" class="field-textarea" rows="5" placeholder="Reflect on planning, testing, collaboration, or time management — how would you improve your approach?…"></textarea>
+            </div>
+          </div>
+
+          <!-- Contribution to Overall System -->
+          <div class="form-card">
+            <div class="card-header">
+              <span class="card-number">05</span>
+              <div>
+                <h2 class="card-title">Contribution to the Overall System</h2>
+                <p class="card-subtitle">How your work fits into the larger project</p>
+              </div>
+            </div>
+            <div class="field-group">
+              <textarea id="r-system" class="field-textarea" rows="5" placeholder="Describe how your work enabled or supported other parts of the project. What would have been missing without your contribution?…"></textarea>
+            </div>
+          </div>
+
+          <!-- Generate Button -->
+          <div class="generate-bar">
+            <button type="submit" class="btn-generate" id="btn-generate-retro">
+              <span class="btn-generate-icon">⟨/⟩</span>
+              Generate LaTeX Document
+            </button>
+          </div>
+
+        </form>
+      </section>
+
+      <!-- ═══════════════════════════════════ -->
+      <!-- OUTPUT PANEL                       -->
+      <!-- ═══════════════════════════════════ -->
+      <section class="output-panel" id="output-panel" aria-live="polite">
+        <div class="output-header">
+          <div class="output-title-group">
+            <span class="output-badge">LaTeX Output</span>
+            <h3 class="output-title" id="output-label">Generated Document</h3>
+          </div>
+          <div class="output-actions">
+            <button class="btn-copy" id="btn-copy" aria-label="Copy LaTeX to clipboard">
+              Copy
+            </button>
+            <button class="btn-download" id="btn-download" aria-label="Download .tex file">
+              ↓ Download .tex
+            </button>
+          </div>
+        </div>
+        <div class="output-body">
+          <pre class="latex-preview" id="latex-output" tabindex="0"></pre>
+        </div>
+      </section>
+
+    </main>
+
+    <footer class="app-footer">
+      <p>TeXReport &mdash; Generate production-ready LaTeX from structured data</p>
+    </footer>
+
+  </div>
+
+  <script src="script.js"></script>
+</body>
+</html>
