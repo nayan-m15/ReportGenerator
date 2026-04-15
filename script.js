@@ -773,3 +773,136 @@ document.querySelectorAll('.field-input, .field-textarea').forEach(el => {
     if (errorEl) errorEl.textContent = '';
   });
 });
+
+/* ═══════════════════════════════════════════════
+   CLEAR BUTTON FUNCTIONALITY
+   ═══════════════════════════════════════════════ */
+
+/**
+ * Clears all input fields in the currently active tab
+ */
+function clearCurrentForm() {
+    // Find which tab is currently active
+    const activeTab = document.querySelector('.tab-btn.active');
+    if (!activeTab) return;
+    
+    const targetTab = activeTab.dataset.tab;
+    
+    if (targetTab === 'form-minutes') {
+        clearMinutesForm();
+    } else if (targetTab === 'form-retro') {
+        clearRetroForm();
+    }
+    
+    // Also hide the output panel when clearing
+    hideOutput();
+    
+    // Show feedback to user
+    showClearFeedback();
+}
+
+/**
+ * Clears all fields in the Minutes form
+ */
+function clearMinutesForm() {
+    // Clear basic text inputs and textareas
+    const textFields = [
+        'm-title', 'm-date', 'm-time', 'm-location', 
+        'm-lead', 'm-purpose', 'm-next-date', 'm-next-purpose'
+    ];
+    
+    textFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) field.value = '';
+    });
+    
+    // Clear dynamic attendees list (keep one empty item)
+    const attendeesList = document.getElementById('attendees-list');
+    if (attendeesList) {
+        // Remove all existing items
+        attendeesList.innerHTML = '';
+        // Add one empty attendee item
+        attendeesList.appendChild(createDynamicItem('attendee-input', 'Full name'));
+    }
+    
+    // Clear decisions list (keep one empty item)
+    const decisionsList = document.getElementById('decisions-list');
+    if (decisionsList) {
+        decisionsList.innerHTML = '';
+        decisionsList.appendChild(createDynamicItem('decision-input', 'Describe a decision made…'));
+    }
+    
+    // Clear risks list (keep one empty item)
+    const risksList = document.getElementById('risks-list');
+    if (risksList) {
+        risksList.innerHTML = '';
+        risksList.appendChild(createDynamicItem('risk-input', 'Describe an issue or risk…'));
+    }
+    
+    // Clear next steps list (keep one empty item)
+    const nextStepsList = document.getElementById('nextsteps-list');
+    if (nextStepsList) {
+        nextStepsList.innerHTML = '';
+        nextStepsList.appendChild(createDynamicItem('nextstep-input', 'Describe a next step…'));
+    }
+    
+    // Clear discussion topics (keep one empty topic with one bullet)
+    const topicsList = document.getElementById('topics-list');
+    if (topicsList) {
+        topicsList.innerHTML = '';
+        topicsList.appendChild(createTopicBlock());
+    }
+    
+    // Clear action items (keep two empty rows)
+    const actionsList = document.getElementById('actions-list');
+    if (actionsList) {
+        actionsList.innerHTML = '';
+        actionsList.appendChild(createActionRow());
+        actionsList.appendChild(createActionRow());
+    }
+    
+    // Clear any validation errors
+    clearErrors(document.getElementById('form-minutes'));
+}
+
+/**
+ * Clears all fields in the Retrospective form
+ */
+function clearRetroForm() {
+    const textFields = [
+        'r-sprint', 'r-date', 'r-name', 'r-course',
+        'r-contributions', 'r-challenges', 'r-differently', 'r-system'
+    ];
+    
+    textFields.forEach(fieldId => {
+        const field = document.getElementById(fieldId);
+        if (field) field.value = '';
+    });
+    
+    // Clear any validation errors
+    clearErrors(document.getElementById('form-retro'));
+}
+
+/**
+ * Shows temporary feedback when clear button is pressed
+ */
+function showClearFeedback() {
+    const clearBtn = document.getElementById('clearBtn');
+    if (!clearBtn) return;
+    
+    // Store original text
+    const originalText = clearBtn.innerHTML;
+    
+    // Change button text temporarily
+    clearBtn.innerHTML = '<span class="btn-generate-icon">✓</span> Cleared!';
+    clearBtn.style.opacity = '0.8';
+    
+    // Reset after 2 seconds
+    setTimeout(() => {
+        clearBtn.innerHTML = originalText;
+        clearBtn.style.opacity = '1';
+    }, 2000);
+}
+
+// Add event listener for the clear button
+document.getElementById('clearBtn')?.addEventListener('click', clearCurrentForm);

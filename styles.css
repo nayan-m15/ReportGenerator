@@ -536,59 +536,140 @@ input[type="time"] {
 /* ═══════════════════════════════════════════════
    GENERATE BUTTON
    ═══════════════════════════════════════════════ */
+/* Container for buttons - spacing them out */
 .generate-bar {
-  display: flex;
-  justify-content: flex-end;
-  margin-top: 8px;
-  margin-bottom: 32px;
+    display: flex;
+    gap: 20px;  /* Space between buttons */
+    justify-content: center;  /* Center align horizontally */
+    align-items: center;
+    flex-wrap: wrap;  /* Wrap on mobile */
+    margin: 30px 0;
 }
 
+/* Alternative spacing options: */
+/* Option 1: Space between (pushes buttons to edges) */
+.generate-bar-space-between {
+    display: flex;
+    justify-content: space-between;
+    gap: 15px;
+}
+
+/* Option 2: Even spacing around buttons */
+.generate-bar-evenly {
+    display: flex;
+    justify-content: space-evenly;
+    gap: 10px;
+}
+
+/* Base button styling - consistent for all buttons */
+.btn-generate,
+.btn-overleaf,
+.btn-clear {
+    padding: 12px 24px;
+    font-size: 16px;
+    font-weight: 600;
+    border: none;
+    border-radius: 8px;
+    cursor: pointer;
+    transition: all 0.3s ease;
+    display: inline-flex;
+    align-items: center;
+    gap: 8px;
+    font-family: inherit;
+}
+
+/* Button icon styling */
+.btn-generate-icon {
+    font-size: 18px;
+    font-weight: bold;
+}
+
+/* Generate button specific styling */
 .btn-generate {
-  display: inline-flex;
-  align-items: center;
-  gap: 10px;
-  padding: 14px 28px;
-  background: linear-gradient(135deg, var(--clr-primary-dim), var(--clr-primary));
-  border: 1px solid var(--clr-primary);
-  border-radius: var(--radius-md);
-  color: #fff;
-  font-family: var(--font-body);
-  font-size: 0.9rem;
-  font-weight: 600;
-  letter-spacing: 0.01em;
-  cursor: pointer;
-  box-shadow: 0 4px 20px rgba(74, 158, 202, 0.25), 0 1px 4px rgba(0,0,0,0.3);
-  transition: transform var(--transition), box-shadow var(--transition), background var(--transition);
-  position: relative;
-  overflow: hidden;
-}
-
-.btn-generate::before {
-  content: '';
-  position: absolute;
-  inset: 0;
-  background: linear-gradient(135deg, rgba(255,255,255,0.08), transparent);
-  opacity: 0;
-  transition: opacity var(--transition);
+    background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+    color: white;
 }
 
 .btn-generate:hover {
-  transform: translateY(-2px);
-  box-shadow: 0 8px 28px rgba(74, 158, 202, 0.35), 0 2px 6px rgba(0,0,0,0.3);
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(102, 126, 234, 0.4);
 }
 
-.btn-generate:hover::before {
-  opacity: 1;
+/* Overleaf button styling */
+.btn-overleaf {
+    background: linear-gradient(135deg, #41B0A7 0%, #2D8F86 100%);
+    color: white;
 }
 
-.btn-generate:active {
-  transform: translateY(0);
+.btn-overleaf:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(65, 176, 167, 0.4);
 }
 
-.btn-generate-icon {
-  font-family: var(--font-mono);
-  font-size: 0.85rem;
-  opacity: 0.85;
+/* Clear button - following same design pattern */
+.btn-clear {
+    background: linear-gradient(135deg, #f56565 0%, #c53030 100%);
+    color: white;
+}
+
+.btn-clear:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 5px 15px rgba(245, 101, 101, 0.4);
+}
+
+/* Alternative clear button style (softer) */
+.btn-clear-soft {
+    background: linear-gradient(135deg, #ed8936 0%, #dd6b20 100%);
+    color: white;
+}
+
+/* Active/pressed state for all buttons */
+.btn-generate:active,
+.btn-overleaf:active,
+.btn-clear:active {
+    transform: translateY(0);
+}
+
+/* Focus state for accessibility */
+.btn-generate:focus,
+.btn-overleaf:focus,
+.btn-clear:focus {
+    outline: none;
+    ring: 2px solid;
+    ring-offset: 2px;
+}
+
+/* Responsive design for mobile */
+@media (max-width: 768px) {
+    .generate-bar {
+        gap: 12px;
+    }
+    
+    .btn-generate,
+    .btn-overleaf,
+    .btn-clear {
+        padding: 10px 16px;
+        font-size: 14px;
+    }
+    
+    .btn-generate-icon {
+        font-size: 16px;
+    }
+}
+
+/* For very small screens - stack vertically */
+@media (max-width: 480px) {
+    .generate-bar {
+        flex-direction: column;
+        gap: 10px;
+    }
+    
+    .btn-generate,
+    .btn-overleaf,
+    .btn-clear {
+        width: 100%;
+        justify-content: center;
+    }
 }
 
 /* ═══════════════════════════════════════════════
